@@ -9,3 +9,6 @@ Route::get('/', function () {
 Route::get('/red', function () {
     return redirect()->route('welcome');
 });
+Route::fallback(function () {
+    return 'walang page';
+});
