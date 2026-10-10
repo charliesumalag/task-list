@@ -3,12 +3,11 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+    return view('index', [
+        'name' => 'charlie'
+    ]);
+})->name('task-list');
 
-Route::get('/red', function () {
-    return redirect()->route('welcome');
-});
 Route::fallback(function () {
     return 'walang page';
 });
