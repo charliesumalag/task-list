@@ -1,61 +1,8 @@
 <?php
 
-use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-
-class Task
-{
-    public function __construct(
-        public int $id,
-        public string $title,
-        public string $description,
-        public ?string $long_description,
-        public bool $completed,
-        public string $created_at,
-        public string $updated_at
-    ) {}
-}
-
-$tasks = [
-    new Task(
-        1,
-        'Buy groceries',
-        'Task 1 description',
-        'Task 1 long description',
-        false,
-        '2023-03-01 12:00:00',
-        '2023-03-01 12:00:00'
-    ),
-    new Task(
-        2,
-        'Sell old stuff',
-        'Task 2 description',
-        null,
-        false,
-        '2023-03-02 12:00:00',
-        '2023-03-02 12:00:00'
-    ),
-    new Task(
-        3,
-        'Learn programming',
-        'Task 3 description',
-        'Task 3 long description',
-        true,
-        '2023-03-03 12:00:00',
-        '2023-03-03 12:00:00'
-    ),
-    new Task(
-        4,
-        'Take dogs for a walk',
-        'Task 4 description',
-        null,
-        false,
-        '2023-03-04 12:00:00',
-        '2023-03-04 12:00:00'
-    ),
-];
-
+use App\Models\Task;
 
 
 Route::get('/', function () {
@@ -63,19 +10,20 @@ Route::get('/', function () {
 });
 
 
-Route::get('/task', function () use ($tasks) {
+Route::get('/task', function () {
+    $tasks = Task::latest()->get();
     return view('index', [
         'tasks' => $tasks,
     ]);
 })->name('task.index');
+Route::view('/task/create', 'create')->name('task.create');
 
-Route::get('/task/{id}', function ($id) use ($tasks) {
-    $tasks = collect($tasks);
-    $task = $tasks->firstWhere('id', $id);
-
-    if (!$task) {
-        abort(Response::HTTP_NOT_FOUND);
-    }
+Route::get('/task/{id}', function ($id) {
+    $task = Task::findorfail($id);
+    //this is used when there is find is used. not findorfail
+    // if (!$task) {
+    //     abort(Response::HTTP_NOT_FOUND);
+    // }
 
     return view('show', ['task' => $task]);
 })->name('task.show');
@@ -83,3 +31,18 @@ Route::get('/task/{id}', function ($id) use ($tasks) {
 Route::fallback(function () {
     return 'walang page';
 });
+
+Route::post('/tasks', function (Request $request) {
+    $data = $request->validate([
+        'title' => 'required|max:255',
+        'description' => 'required',
+        'long_description' => 'required',
+    ]);
+    $task = new Task;
+    $task->title = $data['title'];
+    $task->description = $data['description'];
+    $task->long_description = $data['long_description'];
+
+    $task->save();
+    return redirect()->route('task.show', ['id' => $task->id]);
+})->name('task.store');
