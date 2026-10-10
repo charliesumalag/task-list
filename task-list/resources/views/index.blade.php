@@ -8,6 +8,10 @@
 </head>
 <body>
     <h1>Task List</h1>
-    {{$name}}
+    @forelse ($tasks as $task)
+        <a style="display:block" href="{{route('task.show', ['id' => $task->id])}}">{{$task->title}}</a>
+    @empty
+        <div>Empty list</div>
+    @endforelse
 </body>
 </html>
