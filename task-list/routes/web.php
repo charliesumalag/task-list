@@ -12,7 +12,7 @@ Route::get('/', function () {
 
 
 Route::get('/task', function () {
-    $tasks = Task::latest()->get();
+    $tasks = Task::latest()->paginate(5);
     return view('index', [
         'tasks' => $tasks,
     ]);
@@ -47,7 +47,12 @@ Route::delete('/tasks/{task}', function (Task $task) {
     return redirect()->route('task.index')->with('success', 'Task deleted succesfully');
 })->name('tasks.destroy');
 
+Route::put('tasks/{task}/toggle-complete', function (Task $task) {
 
+    $task->toggleComplete();
+
+    return redirect()->back()->with('success', 'Task updated successfully.');
+})->name('task.toggle-complete');
 
 
 // use Illuminate\Support\Facades\Route;
